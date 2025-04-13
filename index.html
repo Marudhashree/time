@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Time Management App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>🕒 Time Management App</h1>
+
+        <!-- Dark Mode Toggle -->
+        <button id="dark-mode-toggle">🌙 Toggle Dark Mode</button>
+
+        <!-- Search Bar -->
+        <input type="text" id="task-search" placeholder="Search tasks..." class="search-bar">
+
+        <!-- Task Form -->
+        <form action="/add" method="POST" class="task-form">
+            <input type="text" name="task" placeholder="Enter your task" required>
+            <input type="datetime-local" name="deadline">
+            <select name="category">
+                <option value="work">Work</option>
+                <option value="personal">Personal</option>
+                <option value="study">Study</option>
+            </select>
+            <button type="submit">Add Task</button>
+        </form>
+
+        <!-- Task List -->
+        <ul class="task-list">
+            {% for task in tasks %}
+                <li class="task-item {{ task['category'] }} {% if task['done'] %}done{% endif %}" id="task-{{ task['id'] }}">
+                    <div class="task-info">
+                        <strong>{{ task['name'] }}</strong>
+                        {% if task['deadline'] %}
+                            <span class="deadline">🕓 {{ task['deadline'] }}</span>
+                        {% endif %}
+                        <span class="category">Category: {{ task['category'] }}</span>
+                    </div>
+                    <div class="actions">
+                        {% if not task['done'] %}
+                        <a href="/done/{{ task['id'] }}">✅</a>
+                        {% endif %}
+                        <a href="/delete/{{ task['id'] }}">❌</a>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <script>
+        // Dark Mode Toggle
+        const toggleButton = document.getElementById('dark-mode-toggle');
+        toggleButton.addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        });
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+
+        // Search Functionality
+        document.getElementById('task-search').addEventListener('input', function(e) {
+            const searchText = e.target.value.toLowerCase();
+            const tasks = document.querySelectorAll('.task-item');
+
+            tasks.forEach(task => {
+                const taskName = task.querySelector('strong').innerText.toLowerCase();
+                const taskCategory = task.querySelector('.category').innerText.toLowerCase();
+                if (taskName.includes(searchText) || taskCategory.includes(searchText)) {
+                    task.style.display = 'block';
+                } else {
+                    task.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
